@@ -1,0 +1,117 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:BusStop.ViewModels"
+        xmlns:model="using:BusStop.Models"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="BusStop.Views.MainWindow"
+        Title="Симулятор автобусных остановок"
+        x:DataType="vm:MainWindowViewModel">
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Bottom" Margin="10" Spacing="10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                <!-- Выбор остановок для маршрута -->
+                <ComboBox ItemsSource="{Binding AvailableStops}" 
+                          SelectedItem="{Binding SelectedStopToAdd}"
+                          Width="200"
+                          PlaceholderText="Выберите остановку"/>
+                
+                <Button Content="Добавить в маршрут" Command="{Binding AddStopToRoute}" Padding="20 5"/>
+                <Button Content="Очистить маршрут" Command="{Binding ClearRoute}" Padding="20 5"/>
+            </StackPanel>
+            
+            <TextBlock Text="Текущий маршрут:" HorizontalAlignment="Center"/>
+            <TextBlock Text="{Binding CurrentRouteDescription}" HorizontalAlignment="Center" FontWeight="Bold"/>
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="10">
+                <Button Content="Добавить автобус" Command="{Binding AddBus}" Padding="20 5" 
+                        IsEnabled="{Binding CanAddBus}"/>
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
+                <TextBlock Text="Доставлено пассажиров:" FontWeight="Bold"/>
+                <TextBlock Text="{Binding DeliveredPassengers}" FontWeight="Bold"/>
+            </StackPanel>
+            
+            <TextBlock Text="{Binding StatusMessage}" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <TabControl>
+            <!-- Остановки -->
+            <TabItem Header="Остановки">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding BusStops}" Margin="10">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" Margin="0,0,20,0"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="model:BusStop">
+                                <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Padding="10" Width="250" Margin="0,0,20,20">
+                                    <StackPanel Spacing="5">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16"/>
+                                        <TextBlock Text="Ожидают пассажиры:" Margin="0 10 0 0"/>
+                                        <ItemsControl ItemsSource="{Binding WaitingPassengers}" Margin="10 0" Height="100">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="model:IPassenger">
+                                                    <TextBlock Text="{Binding}"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                        <TextBlock Text="Автобусы на остановке:" Margin="0 10 0 0"/>
+                                        <ItemsControl ItemsSource="{Binding Buses}" Margin="10 0" Height="150">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="model:Bus">
+                                                    <Border BorderBrush="LightGray" BorderThickness="1" Margin="0 5" Padding="5">
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding Number}" FontWeight="Bold"/>
+                                                            <TextBlock Text="{Binding RouteDescription}"/>
+                                                            <TextBlock Text="{Binding Passengers.Count, StringFormat='Пассажиров: {0}/{1}'}"
+                                                                       Tag="{Binding Capacity}"/>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </TabItem>
+            <!-- Автобусы в пути -->
+            <TabItem Header="Автобусы в пути">
+                <ScrollViewer>
+                    <ItemsControl ItemsSource="{Binding MovingBuses}" Margin="10">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="model:Bus">
+                                <Border BorderBrush="Blue" BorderThickness="1" CornerRadius="5" Padding="10" Margin="0,0,0,10">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Number}" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding RouteDescription}"/>
+                                        <TextBlock Text="{Binding CurrentStop, StringFormat='Текущая остановка: {0}'}"/>
+                                        <ProgressBar Value="{Binding ProgressToNextStop}" Maximum="1" Height="20" Margin="0,5"/>
+                                        <TextBlock Text="{Binding Passengers.Count, StringFormat='Пассажиров: {0}/{1}'}"
+                                                   Tag="{Binding Capacity}"/>
+                                        <TextBlock Text="Пассажиры:" Margin="0,5,0,0"/>
+                                        <ItemsControl ItemsSource="{Binding Passengers}" Margin="10,0">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="model:IPassenger">
+                                                    <TextBlock Text="{Binding}"/>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
